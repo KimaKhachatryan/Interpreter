@@ -6,6 +6,9 @@
 #include <map>
 #include <list>
 
+#include "functions.h"
+#include "classes.h"
+
 //fakes symbol table
 std::vector<std::pair<std::string, std::list<std::string>*>> symbol_table;
 
@@ -14,6 +17,9 @@ std::map<size_t, std::vector<std::string>> parsed;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////FUNCTION_DECLERATIONS/////////////////////////////////////////////////////
+
+//before interpretation checks () [] {} symbols and presence if main() 
+void preinterpret(char* fileName);
 
 //fills symbol_table
 void fill_symbol_table (std::vector<std::pair<std::string, std::list<std::string>*>>& vec);
@@ -24,14 +30,10 @@ std::vector<std::string> tokenizer(std::string str);
 //checks whether the tokenized string is valid or not
 //if there is any syntax error, function prints error message and interapts the program execution
 //else does nothing
-void is_valid(std::vector<std::string> vec); 
+void is_valid(std::vector<std::string> vec, size_t code_line); 
 
 //interprets and executes the line
 void interpret(std::vector<std::string> vec);
-
-//before interpretation checks () [] {} symbols
-void preinterpret(char* fileName);
-bool validParentheses(std::vector<char>& vec);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////MAIN//////////////////////////////////////////////////////////////////
@@ -39,7 +41,7 @@ bool validParentheses(std::vector<char>& vec);
 int main (int args, char* argv[])
 {
 	preinterpret(argv[1]);
-/*
+
 	size_t code_line = 1;
 	std::ifstream read;	
 	std::string str;
@@ -63,16 +65,14 @@ int main (int args, char* argv[])
 		}
 		
 		parsed[code_line] = tokenizer(str);
-		is_valid(parsed[code_line]);
+		is_valid(parsed[code_line], code_line);
 		interpret(parsed[code_line]);
 		++code_line;
 	}
 
 	read.close();
-*/
+
 	return 0;
 }
 
 
-#include "functions.h"
-#include "classes.h"
