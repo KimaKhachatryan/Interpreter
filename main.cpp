@@ -6,8 +6,6 @@
 #include <map>
 #include <list>
 
-#include "functions.h"
-#include "classes.h"
 
 //fakes symbol table
 std::vector<std::pair<std::string, std::list<std::string>*>> symbol_table;
@@ -35,11 +33,14 @@ void is_valid(std::vector<std::string> vec, size_t code_line);
 //interprets and executes the line
 void interpret(std::vector<std::string> vec);
 
+#include "classes.h"
+#include "functions.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////MAIN//////////////////////////////////////////////////////////////////
 
 int main (int args, char* argv[])
 {
+	
 	preinterpret(argv[1]);
 
 	size_t code_line = 1;
@@ -65,8 +66,9 @@ int main (int args, char* argv[])
 		}
 		
 		parsed[code_line] = tokenizer(str);
+	
 		is_valid(parsed[code_line], code_line);
-		interpret(parsed[code_line]);
+//		interpret(parsed[code_line]);
 		++code_line;
 	}
 

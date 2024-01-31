@@ -1,4 +1,5 @@
 #include <stack>
+#include <algorithm>
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------DEFINITIONS------------------------------------------------------------
 
@@ -54,6 +55,9 @@ void difinitions (std::vector<std::string> vec, size_t code_line);
 //and if find it, return its identification
 std::string find_in_symTable(std::string str);
 
+//searches name conflicts
+bool name_lookup(std::string);
+
 //---------------------------------------------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void preinterpret(char* fileName)
@@ -87,7 +91,7 @@ void preinterpret(char* fileName)
 				invalid_main = true;
 			}
 		}
-
+	
 		while (str[index] != '\0') {
 			if (str[index] == '{' || str[index] == '}' || str[index] == '[' || str[index] == ']' || str[index] == '(' || str[index] == ')') {
 				vec.push_back(str[index]);	
@@ -97,14 +101,15 @@ void preinterpret(char* fileName)
 		}
 		index = 0;
 	}
-
+	
+	Error error(0);
 	if (!valid_main || invalid_main) {
-		std::cout << "I haven't found the main(). I don't know where to start execution of the program." << std::endl;
+		error.message(7);					//There is not main()
 		exit(0);
 	}
-	
+
 	if (!validParentheses(vec)) {
-		std::cout << "You have syntax error! Check parentheses!" << std::endl;
+		error.message(7);					//Invalid parentheses
 		exit(0);
 	}
 
@@ -113,6 +118,7 @@ void preinterpret(char* fileName)
 
 void fill_symbol_table(std::vector<std::pair<std::string, std::list<std::string>*>>& vec)
 {
+	vec.resize(3);
 	vec[0].first = "typeID";
     	vec[0].second = new std::list<std::string>();
 
@@ -156,6 +162,7 @@ void fill_symbol_table(std::vector<std::pair<std::string, std::list<std::string>
 
    	 vec[2].second->push_back("if");
    	 vec[2].second->push_back("while");
+   	 vec[2].second->push_back("main");
 }
 
 std::vector<std::string> tokenizer(std::string str)
@@ -191,12 +198,7 @@ void interpret (std::vector<std::string> vec)
 
 bool has_main(std::string str)
 {
-	std::stringstream ss(str);
-	std::vector<std::string> vec;
-	std::string token;
-	while (ss >> token) {
-		vec.push_back(token);
-	}
+	std::vector<std::string> vec = tokenizer(str);
 
 	if (vec.size() == 0 || vec.size() > 4) {
 		return false;
@@ -207,6 +209,7 @@ bool has_main(std::string str)
 			return false;
 		} else if (i == 1) {
 			if (vec[i] == "main(){" && vec.size() == 2) {
+				parsed[0] = vec;
 				return true;
 			} else if (vec[i] != "main()") {
 				if (vec[i] != "main") {
@@ -214,6 +217,7 @@ bool has_main(std::string str)
 				}
 			} else {
 				if (vec.size() == 2) {
+					parsed[0] = vec;
 					return true;
 				}
 			}
@@ -222,6 +226,7 @@ bool has_main(std::string str)
 				if (vec[i] != "()") {
 					return false;
 				} else if (vec[i] == "(){" && vec.size() == 3){
+					parsed[0] = vec;
 					return true;
 				}
 			} else if (vec[1] == "main()") {
@@ -229,12 +234,14 @@ bool has_main(std::string str)
 					return false;
 				} else {
 					if (vec.size() == 3) {
+						parsed[0] = vec;
 						return true;
 					}
 				}
 			} 
 		}
 	}
+	parsed[0] = vec;
 	return true;
 } 
 
@@ -310,6 +317,57 @@ void declarations(std::vector<std::string> vec, size_t code_line)
 
 bool int_declaration(std::vector<std::string> vec, size_t code_line)
 {
+	if (vec == parsed[0]) {
+		return false;
+	}
+
+	Error error(code_line);
+	
+	if (vec.size() == 1) {
+			error.message(1);
+			exit(0);
+	}
+
+	for (size_t i = 1; i < vec.size(); ++i) {
+		if (i == 1) {
+			if (vec[i] == ";") {
+				error.message(2);				//expected ;
+				exit(0);
+			} else if (find_in_symTable(vec[i]) == "operator") {
+				error.message(6);				//unnamed variable
+				exit(0);
+			} else if (find_in_symTable(vec[i]) != "X") {		//if string didn't found in symble_table, function returns "X"
+				error.message(3);				// name conflict
+				exit(0);
+			} else if (name_lookup(vec[i])) {		     
+				error.message(4);				//Redeclaration
+				exit(0);
+			} else if (vec.size() == 2) {
+				error.message(1);
+				exit(0);
+			}
+		} else if (i == 2) {
+			if (vec[i] == ";") {
+				if (vec.size() == 3) {
+					return true;
+				} else {
+					error.message(1);
+					exit(0);
+				}
+			} else if (vec[i] == "=") {
+				if (vec.size() < 5) {
+					error.message(5);			//uninitialized variable
+					exit(0);
+				} 
+			}	
+		} else if (i == 4) {
+			if (vec[i] != ";") {
+				error.message(1);
+				exit(0);
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -383,10 +441,22 @@ void difinitions (std::vector<std::string> vec, size_t code_line)
 
 std::string find_in_symTable(std::string str)
 {
-	return std::string();
+	for (size_t i = 0; i < symbol_table.size(); ++i) {
+		auto it = std::find(symbol_table[i].second->begin(), symbol_table[i].second->end(), str);
+		if (it != symbol_table[i].second->end()) {
+			return symbol_table[i].first;
+		}
+	}
+	
+	//if string did not found in table, function returns "X"
+	std::string X = "X";
+	return X;
 }
 
-
+bool name_lookup(std::string str)
+{
+	return false;
+}
 
 
 
