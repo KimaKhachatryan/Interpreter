@@ -16,6 +16,10 @@ public:
 	void message (int r)
 	{
 		switch(r) {
+			case 0:
+				std::cout << "Error in line " << code_line << ": " 
+					  << "Ipp interpreter doesn't support that syntax." << std::endl;
+				break;
 			case 1:
 				std::cout << "Error in line " << code_line << ": " 
 					  << "Expected \";\" operator." << std::endl;
@@ -44,6 +48,30 @@ public:
 				break;
 			case 8:
 				std::cout << "You have syntax error! Check parentheses!" << std::endl;
+				break;
+			case 9:
+				std::cout << "You have syntax error in line " << code_line << ".\nPlease check it." << std::endl;
+				break;
+			case 10:
+				std::cout << "Error in line " << code_line << ".\nYou cann't declare string array!" << std::endl;
+				break;
+			case 11:
+				std::cout << "Error in line " << code_line << ".\nStatic array must have size!" << std::endl;
+				break;
+			case 12:
+				std::cout << "Error in line " << code_line << ".\nVariable declaration not found!" << std::endl;
+				break;
+			case 13:
+				std::cout << "Error in line " << code_line << ".\nExpected \"\"." << std::endl;
+				break;
+			case 14:
+				std::cout << "Error in line " << code_line << ".\nExpected \'\'." << std::endl;
+				break;
+			case 15:
+				std::cout << "Error in line " << code_line << ".\nExpected initializer." << std::endl;
+				break;
+			case 16:
+				std::cout << "Error in line " << code_line << ".\nStrings must initialized at the moment of declaration." << std::endl;
 				break;
 		}
 	}
