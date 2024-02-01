@@ -40,7 +40,6 @@ void interpret(std::vector<std::string> vec);
 
 int main (int args, char* argv[])
 {
-	
 	preinterpret(argv[1]);
 
 	size_t code_line = 1;
@@ -64,14 +63,13 @@ int main (int args, char* argv[])
 			++code_line;
 			continue;
 		}
-		
+
 		parsed[code_line] = tokenizer(str);
-	
 		is_valid(parsed[code_line], code_line);
 //		interpret(parsed[code_line]);
 		++code_line;
 	}
-
+	
 	read.close();
 
 	return 0;
