@@ -6,12 +6,17 @@
 #include <map>
 #include <list>
 
+#include "classes.h"
 
 //fakes symbol table
 std::vector<std::pair<std::string, std::list<std::string>*>> symbol_table;
 
 //parsed map collects code file lines, where size_t is line number, vector is tokenized string expresing minimal meaning
 std::map<size_t, std::vector<std::string>> parsed;
+
+//containers for variables
+std::map<std::string, Int> integer;
+std::map<std::string, Double> doubl;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////FUNCTION_DECLERATIONS/////////////////////////////////////////////////////
@@ -33,7 +38,6 @@ void is_valid(std::vector<std::string> vec, size_t code_line);
 //interprets and executes the line
 void interpret(std::vector<std::string> vec);
 
-#include "classes.h"
 #include "functions.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////MAIN//////////////////////////////////////////////////////////////////
@@ -76,3 +80,5 @@ int main (int args, char* argv[])
 }
 
 
+#include "functions.hpp"
+#include "classes.hpp"
